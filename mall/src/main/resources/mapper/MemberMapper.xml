@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.MemberMapper">
+  <insert id="memberOk" parameterType="com.example.demo.vo.MemberVo">
+     insert into member
+     (userid,pwd,email,name,phone,writeday)
+     values(#{userid},#{pwd},#{email},
+     #{name},#{phone},now())
+  </insert>
+  
+  <select id="useridChk" resultType="int">
+  	select count(*) from member where userid=#{userid}
+  </select>
+  
+  <select id="loginOk" resultType="com.example.demo.vo.MemberVo">
+  	select * from member where userid=#{userid} and pwd=#{pwd}
+  </select>
+  
+  <select id="jumunList" resultType="com.example.demo.vo.GumaeVo">
+  	select  g.*,p.pimg,p.title,p.price,p.halin from gumae as g 
+  	inner join product as p 
+  	on p.pcode=g.pcode 
+  	where g.userid=#{userid}
+  	group by jumuncode order by writeday desc, jumuncode desc
+  </select>
+  
+  <select id="jcodeCnt" resultType="int">
+   	select count(*) as cnt from gumae where jumuncode=#{jumuncode}
+  </select> 
+  
+  <delete id="jlistDel">
+    delete from gumae where userid=#{userid} and jumuncode=#{jumuncode}
+  </delete>
+  
+  <update id="stateUp">
+  	update gumae set state= #{state} where no =#{no}
+  </update>
+  
+  <select id="jlist" resultType="com.example.demo.vo.GumaeVo">
+  	select * from gumae where jumuncode=#{jumuncode}
+  </select> 
+  
+  <select id="getInfo" resultType="com.example.demo.vo.MemberVo">
+  	select * from member where userid=#{userid}
+  </select>
+  
+  <update id="chgEmail">
+  	update member set email = #{param2} where userid = #{param1}
+  </update>
+  
+  <update id="chgPhone">
+   update member set phone = #{param2} where userid = #{param1}
+  </update>
+  
+  <insert id="reviewWriteOk" parameterType="com.example.demo.vo.ReviewVo">
+  insert into review(star,content,pcode,userid,ppcode,color,size,writeday)
+  values(#{star},#{content},#{pcode},#{userid},#{ppcode},#{color},#{size},now())
+  </insert>
+  
+  <select id="getReviewAvg" resultType="double">
+  select avg(star) from review where pcode=#{pcode}
+  </select>
+  
+  <update id="setProStar">
+    update product set star = #{param1} where pcode=#{param2}
+  </update>
+  
+  <update id="isReview">
+    update gumae set isReview = 1 where no=#{no}
+  </update>
+  
+  <select id="chkReview">
+  	select isReview from gumae where no=#{no}
+  </select>
+  
+  <select id="jumunQuestWrite" resultType="com.example.demo.vo.GumaeVo">
+	select * from gumae where no=#{no}
+</select>
+
+  <select id="getProTitle">
+  	select title from product where pcode=#{pcode}
+  </select>
+  
+  <select id="getProPimg">
+  	select pimg from product where pcode=#{pcode}
+  </select>
+  
+  <insert id="jumunQuestWriteOk" parameterType="com.example.demo.vo.QuestVo">
+  	insert into jumunquest(jumuncode,pcode,userid,content,title,qtype,pimg,ref,writeday,writeday_date)
+  	values(#{jumuncode},#{pcode},#{userid},#{content},#{title},#{qtype},#{pimg},#{ref},now(),now())
+  </insert>
+  
+  <insert id="proQuestWriteOk" parameterType="com.example.demo.vo.QuestVo">
+    insert into proquest(pcode,content,userid,view,qtype,ref,writeday,writeday_date)
+    values(#{pcode},#{content},#{userid},#{view},#{qtype},#{ref},now(),now())
+  </insert>
+ 
+  <update id="reviewUpdateOk">
+  	update review set content=#{content},star=#{star} where no=#{no}
+  </update>
+  
+  <delete id="proQuestDel">
+  delete from proquest where ref = #{ref}
+  </delete>
+  
+  <select id="getproQuest" resultType="com.example.demo.vo.QuestVo">
+    select * from proquest where no = #{no}
+  </select>
+  
+  <update id="proQuestUpdateOk">
+  	update proquest set qtype=#{qtype},content=#{content},view=#{view} where no=#{no}
+  </update>
+  
+  <select id="getMaxRef">
+  	select ifnull(max(ref),0)+1 from proquest 
+  </select>
+  
+  <select id="getGumae" resultType="com.example.demo.vo.GumaeVo">
+  	select g.*,p.pimg,p.title,p.halin,p.price from gumae as g inner join product as p 
+  	on g.pcode = p.pcode where g.userid = #{userid} and g.writeday 
+  	between date_add(now(),interval -1 week) and  now() order by writeday_time desc
+  	limit #{gindex},5
+  </select>
+  
+  <select id="getCart" resultType="com.example.demo.vo.ProductVo">
+  	select c.pcode,c.color,c.size,c.su,c.writeday,c.no,
+	p.pimg,p.title,p.price,p.bprice,p.halin,p.juk,p.btime
+	from cart as c inner join product as p on c.pcode=p.pcode
+	where c.userid = #{userid}
+  </select>
+  <select id="getJjim" resultType="com.example.demo.vo.ProductVo">
+  	select j.*,p.pimg,p.title,p.price,p.heart from jjim as j inner join product as p
+  	on j.pcode =p.pcode where j.userid = #{userid} limit #{index},5
+  </select>
+  <select id="getProQuest" resultType="com.example.demo.vo.QuestVo">
+  	select q.*,p.pimg,p.title,p.pcode,(select count(*) from proquest where ref=q.ref) as chk from proquest 
+  	as q inner join product as p on q.pcode=p.pcode where userid = #{userid} and q.qa=0
+  	order by ref asc
+  </select>
+  <select id="getJumunQuest" resultType="com.example.demo.vo.QuestVo">
+  	select j.*,(select count(*) from jumunquest where ref=j.ref)as chk from jumunquest as j where userid = #{userid}
+  </select>
+  <select id="getReview" resultType="com.example.demo.vo.ReviewVo">
+  	select r.*,p.pimg,p.title from review as r inner join product as p on r.pcode=p.pcode where userid = #{userid}
+  </select>
+  
+  <select id="getGumaeChong">
+    select ceil(count(*)/5) from gumae where userid = #{userid}
+  </select>
+  
+  <update id="MycartUp">
+  	update cart set su = #{su} where no = #{no}
+  </update>
+  
+  <select id="getPrice">
+    select price from product where pcode=#{pcode}
+  </select>
+  
+  <select id="getAnswer" resultType="com.example.demo.vo.QuestVo">
+    select * from proquest where ref=#{ref} and qa=1
+  </select>
+  
+  <select id="getQuest1" resultType="com.example.demo.vo.QuestVo">
+    select * from proquest where ref = #{ref} and qa=0
+  </select>
+  
+  <select id="getMaxJRef">
+    select ifnull(max(ref),0)+1 from jumunquest
+  </select>
+  
+  <select id="getAnswer1" resultType="com.example.demo.vo.QuestVo">
+    select * from jumunquest where ref=#{ref} and qa=1
+  </select>
+  
+  <select id="getQuest2" resultType="com.example.demo.vo.QuestVo">
+    select * from jumunquest where ref = #{ref} and qa=0
+  </select>
+  
+  <select id="getJjimChong">
+    select ceil(count(*)/5) from jjim where userid = #{userid}
+  </select>
+  
+  <select id="viewList" resultType="com.example.demo.vo.GumaeVo">
+  	select  g.*,p.pimg,p.title,p.price,p.halin,(select count(*) from gumae where g.jumuncode=#{jumuncode})as cnt from gumae as g 
+  	inner join product as p 
+  	on p.pcode=g.pcode 
+  	where g.jumuncode=#{jumuncode} order by no asc
+  </select>
+  
+  <delete id="reviewDel">
+    delete from review where no = #{no}
+  </delete>
+  
+  <select id="getReview1" resultType="com.example.demo.vo.MemberVo">
+   select juk from member where userid=#{userid}
+  </select>
+  <select id="getReview2" resultType="com.example.demo.vo.ReviewVo">
+   select * from review where no=#{no}
+  </select>
+  
+  <select id="getJumunQuest1" resultType="com.example.demo.vo.GumaeVo">
+    select * from jumunquest where no = #{param1}
+  </select>
+  
+  <update id="jumunQuestUpdateOk">
+    update jumunquest set qtype=#{qtype},title=#{title},content=#{content} where no=#{no}
+  </update>
+
+	<delete id="jumunQuestDel">
+	  delete from jumunquest where ref = #{ref}
+	</delete>
+	
+ 	<update id="plusjuk"> 
+ 	  update member set juk = juk+150 where userid = #{userid} 
+ 	</update> 
+ 	
+ 	<update id="pwdChg">
+ 	  update member set pwd = #{param2} where userid = #{param1}
+ 	</update>
+</mapper>

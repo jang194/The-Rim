@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ProductMapper">
+
+<select id="productList" resultType="com.example.demo.vo.ProductVo">
+	select * from product where pcode like concat(#{pcode},'%')
+	order by ${field} limit #{index},20
+</select>
+
+<select id="getChong">
+  select ceil(count(*)/20) from product where pcode like concat(#{pcode},'%')
+</select>
+	
+<select id="proContent" resultType="com.example.demo.vo.ProductVo">
+	select * from product where pcode=#{pcode}
+</select>
+	
+<select id="getInfo" resultType="com.example.demo.vo.MemberVo">
+	select * from member where userid = #{userid}
+</select>
+	
+<insert id="baeWriteOk" parameterType="com.example.demo.vo.BaeVo">
+	insert into baesong(name,juso,jusoEtc,zip,phone,userid,gibon)
+	values(#{name},#{juso},#{jusoEtc},#{zip},#{phone},#{userid},#{gibon})
+</insert>
+	
+<select id="baeList" resultType="com.example.demo.vo.BaeVo">
+	select * from baesong where userid = #{userid} order by gibon desc
+</select>
+
+<select id="getBaesong" resultType="com.example.demo.vo.BaeVo">
+	select * from baesong where userid= #{userid} order by gibon desc limit 1
+</select>
+	
+<update id="SetGibon">
+	update baesong set gibon=0 where userid=#{userid}
+</update>
+
+<insert id="proGumaeOk" parameterType="com.example.demo.vo.GumaeVo">
+	insert into gumae(baeNo,su,cprice,juk,pay,bank,card,tong,bank2,
+	pcode,userid,coupon,jumuncode,ppcode,gigan,writeday,writeday_time)
+	values(#{baeNo},#{su},#{cprice},#{juk},#{pay},#{bank},#{card},#{tong},#{bank2}
+	,#{pcode},#{userid},#{coupon},#{jumuncode},#{ppcode},#{gigan},now(),now())
+</insert>
+
+<delete id="proGumaeOkDel">
+	delete from cart where no = #{no}
+</delete>
+
+
+<select id="getNumber" resultType="int">
+	select ifnull(max(right(jumuncode,3)),0)+1 from gumae where jumuncode
+	 like concat(#{jumuncode},'%')
+</select>
+
+<select id="jumunView" resultType="com.example.demo.vo.GumaeVo">
+	select *,(select count(*) from gumae where jumuncode=#{jumuncode})
+	 as cnt from gumae where jumuncode=#{jumuncode}
+</select>
+
+<select id="getBaesong2" resultType="com.example.demo.vo.BaeVo">
+	select * from baesong where no = #{baeNo}
+</select>
+
+<insert id="jjimAdd" parameterType="com.example.demo.vo.JjimVo">
+	insert into jjim(pcode,userid,writeday)
+	values(#{pcode},#{userid},now())
+</insert>
+
+<delete id="jjimDel">
+	delete from jjim where pcode=#{pcode} and userid=#{userid}
+</delete>
+
+<select id="jjimChk" resultType="boolean">
+	select count(*) from jjim where pcode=#{pcode} and userid = #{userid}
+</select>
+
+<insert id="addCart" parameterType="com.example.demo.vo.CartVo">
+	insert into cart(userid,pcode,color,size,su,ppcode,writeday)
+	values(#{userid},#{pcode},#{color},#{size},#{su},#{ppcode},now())
+</insert>
+
+<select id="isCart" resultType="boolean">
+	select count(*) from cart where userid=#{userid} and pcode=#{pcode}
+</select>
+
+<select id="jjimList" resultType="com.example.demo.vo.ProductVo">
+	select j.pcode,j.no,j.writeday,p.pimg,p.title,p.price,p.halin,
+	(select count(*) from cart where pcode=j.pcode) as cnt
+	from jjim as j inner join product as p
+	on j.pcode = p.pcode
+	where userid=#{userid}
+</select>
+
+<select id="getJego" resultType="com.example.demo.vo.JegoVo">
+	select * from jego where pcode=#{pcode} order by color asc,size asc limit 1
+</select>
+
+<insert id="addCart2" parameterType="com.example.demo.vo.JegoVo">
+	insert into cart(userid,pcode,color,size,ppcode,writeday)
+	values(#{userid},#{pcode},#{color},#{size},#{ppcode},now())
+</insert>
+
+<delete id="jjimListDel">
+	delete from jjim where no=#{no}
+</delete>
+
+<select id="cartList" resultType="com.example.demo.vo.ProductVo">
+	select c.pcode,c.color,c.size,c.su,c.writeday,c.no,
+	p.pimg,p.title,p.price,p.bprice,p.halin,p.juk,p.btime
+	from cart as c inner join product as p on c.pcode=p.pcode
+	where userid = #{userid} order by no desc
+</select>
+
+<delete id="cartDel">
+	delete from cart where userid=#{userid} and no=#{no}
+</delete> 
+
+<update id="upCartSu">
+	update cart set su = #{param2} where no=#{param1}
+</update>
+
+<select id="getQuest" resultType="com.example.demo.vo.QuestVo">
+	select * from proquest where pcode = #{pcode} and qa=0 order by ref desc
+</select>
+
+<select id="getReview" resultType="com.example.demo.vo.ReviewVo">
+	select * from review where pcode=#{pcode}
+</select>
+
+<select id="getReviewCnt">
+	select count(*) as cnt from review where pcode=#{pcode}
+</select>
+
+ <select id="getProQcnt">
+  	select count(*) from proquest where pcode=#{pcode} and qa=0
+  </select>
+  
+  <delete id="reviewDel">
+  	delete from review where no = #{no}
+  </delete>
+  
+  <select id="getAnswer" resultType="com.example.demo.vo.QuestVo">
+    select * from proquest where ref=#{ref} and qa=1
+  </select>
+  
+  <select id="getQuest1" resultType="com.example.demo.vo.QuestVo">
+    select * from proquest where ref = #{ref} and qa=0
+  </select>
+
+  <select id="getReviewAvg">
+    select avg(star) from review where pcode=#{pcode}
+  </select>
+  
+  <update id="setProStar">
+    update product set star = #{avg} where pcode = #{pcode}
+  </update>
+  
+  <update id="plusPansu">
+  	update product set pansu = pansu + #{param2} where pcode = #{param1}
+  </update>
+  
+  <update id="upProHeart">
+    update product set heart = heart + 1 where pcode=#{pcode}
+  </update>
+  
+  <update id="downProHeart">
+    update product set heart = heart-1 where pcode=#{pcode}
+  </update>
+  
+  <update id="chgReq">
+    update baesong set req = #{param2} , greq = #{param3} where no = #{param1}
+  </update>
+  
+  <update id="chgGreq">
+    update baesong set greq = #{param2} where no = #{param1}
+  </update>
+  
+  <update id="getJuk">
+    update member set juk = juk + #{param2} where userid = #{param1}
+  </update>
+  
+  <update id="UpJego">
+    update jego set su=su-#{param2} where ppcode = #{param1}
+  </update>
+  
+  <update id="minusJuk">
+    update member set juk = juk-#{param2} where userid = #{param1}
+  </update>
+  
+  <select id="getRef">
+    select count(*) from proquest where ref = #{ref}
+  </select>
+  
+  <delete id="baeDel">
+    delete from baesong where no = #{no}
+  </delete>
+  
+  
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.CalendarMapper">
+	<select id="gumaeCal" resultType="HashMap">
+	     select pcode,state,right(writeday,2) as dday
+	     ,(select title from product where pcode=gumae.pcode) as title
+	     from gumae
+	     where userid=#{userid} and writeday like concat(#{ym},'%')
+	     order by right(writeday,2) asc 
+	  </select>
+</mapper>
